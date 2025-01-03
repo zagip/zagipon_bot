@@ -6,7 +6,10 @@ bot = telebot.TeleBot(API_TOKEN)
 
 GROUP_ID = -4716889464
 CHANNEL_ID = -1002377166835
-#CHANNEL_ID = -1002385851046
+
+@bot.message_handler(commands=['start'])
+def send_welcome(message):
+    bot.send_message(message.chat.id, "Привет! Вы можете отправлять мне сообщения с текстом, видео и фото.")
 
 @bot.message_handler(content_types=['text', 'photo', 'video'])
 def handle_content(message):
@@ -14,7 +17,9 @@ def handle_content(message):
     btn_send = types.InlineKeyboardButton("Отправить", callback_data='send')
     btn_cancel = types.InlineKeyboardButton("Не отправлять", callback_data='cancel')
     markup.add(btn_send, btn_cancel)
-    
+
+    user_info = f"Отправитель: {message.from_user.first_name} {message.from_user.last_name} (ID: {message.from_user.id}, Username: @{message.from_user.username})"
+
     if message.content_type == 'text':
         bot.send_message(GROUP_ID, message.text, reply_markup=markup)
     elif message.content_type in ['photo', 'video']:
@@ -24,6 +29,7 @@ def handle_content(message):
         elif message.content_type == 'video':
             video_id = message.video.file_id
             bot.send_video(GROUP_ID, video_id, caption=message.caption, reply_markup=markup)
+    bot.send_message(GROUP_ID, user_info)
 
 @bot.callback_query_handler(func=lambda call: True)
 def handle_query(call):
