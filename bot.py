@@ -25,8 +25,8 @@ def uzhimatel(message):
     mid = bot.forward_message(GROUP_ID, message.chat.id, message.id).id
 
     markup = types.InlineKeyboardMarkup()
-    btn_send = types.InlineKeyboardButton("Указать имя", callback_data=json.dumps({"a": 1, "c":message.chat.id, "m":message.id, "i": mid}))
-    btn_cancel = types.InlineKeyboardButton("Не указывать", callback_data=json.dumps({"a": 0, "c":message.chat.id, "m":message.id, "i": mid}))
+    btn_send = types.InlineKeyboardButton("Указать имя", callback_data=json.dumps({"a": 0, "c":message.chat.id, "m":message.id, "i": mid}))
+    btn_cancel = types.InlineKeyboardButton("Не указывать", callback_data=json.dumps({"a": 1, "c":message.chat.id, "m":message.id, "i": mid}))
     markup.add(btn_send, btn_cancel)
 
     bot.send_message(message.chat.id, "Указывать ли имя при отправке в канал?", reply_markup=markup)
@@ -36,7 +36,7 @@ def handle_query(call):
     d = json.loads(call.data)
     if "send" in d:
         if d["send"]==1:
-            if d["a"]==1:
+            if d["a"]==0:
                 bot.forward_message(CHANNEL_ID, d["c"], d["m"])
             else:
                 bot.copy_message(CHANNEL_ID, d["c"], d["m"])
@@ -52,6 +52,6 @@ def handle_query(call):
         btn_cancel = types.InlineKeyboardButton("Не отправлять", callback_data=json.dumps({"send": 0, "c":d["c"], "m":d["m"], "a":d["a"]}))
         markup.add(btn_send, btn_cancel)
         
-        bot.send_message(GROUP_ID, "Отправить в канал?", reply_markup=markup)
+        bot.send_message(GROUP_ID, f"Отправить в канал? (anon={d['a']})", reply_markup=markup)
 
 bot.polling(non_stop=True)
