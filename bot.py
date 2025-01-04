@@ -23,22 +23,24 @@ def uzhimatel(message):
 
     print("MASSIVE")
     user_info = f"Отправитель: {message.from_user.first_name} (@{message.from_user.username})"
-    mid = bot.send_message(GROUP_ID, user_info).id
+    mid = bot.forward_message(GROUP_ID, message.chat.id, message.id).id
 
     markup = types.InlineKeyboardMarkup()
     btn_send = types.InlineKeyboardButton("Отправить", callback_data=json.dumps({"send": 1, "mid": mid, "ochat":message.chat.id, "omsg":message.id}))
     btn_cancel = types.InlineKeyboardButton("Не отправлять", callback_data=json.dumps({"send": 0, "mid": mid, "ochat":message.chat.id, "omsg":message.id}))
     markup.add(btn_send, btn_cancel)
 
-    bot.copy_message(GROUP_ID, message.chat.id, message.id, reply_markup=markup)
+    bot.send_message(GROUP_ID, user_info, reply_markup=markup)
 
+
+    
 
 
 @bot.callback_query_handler(func=lambda call: True)
 def handle_query(call):
     d = json.loads(call.data)
     if d["send"]:
-        bot.copy_message(CHANNEL_ID, call.message.chat.id, call.message.id, reply_markup=None)
+        bot.forward_message(CHANNEL_ID, d["ochat"], d["omsg"])
         
         bot.delete_message(GROUP_ID, call.message.id)
         bot.delete_message(GROUP_ID, d["mid"])
