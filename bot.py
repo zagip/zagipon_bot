@@ -40,7 +40,7 @@ def uzhimatel(message):
 def handle_query(call):
     d = json.loads(call.data)
     if d["send"]:
-        bot.forward_message(CHANNEL_ID, d["ochat"], d["omsg"])
+        bot.copy_message(CHANNEL_ID, d["ochat"], d["omsg"])
         
         bot.delete_message(GROUP_ID, call.message.id)
         bot.delete_message(GROUP_ID, d["mid"])
