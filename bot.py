@@ -43,9 +43,11 @@ def handle_query(call):
             video_id = call.message.video.file_id
             bot.send_video(CHANNEL_ID, video_id, caption=call.message.caption)
 
-        bot.send_message(GROUP_ID, "Контент отправлен", reply_to_message_id=call.message.message_id)
+        call.message.delete()
+
     elif call.data == 'cancel':
         bot.send_message(GROUP_ID, "Отправка отменена", reply_to_message_id=call.message.message_id)
+        call.message.delete() 
 
 
 bot.polling(non_stop=True)
