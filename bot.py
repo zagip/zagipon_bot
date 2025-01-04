@@ -6,8 +6,7 @@ API_TOKEN = '7983118789:AAE_oZyr-JhlK6DyaotZ4LS-P1jtFv5j980'
 bot = telebot.TeleBot(API_TOKEN)
 
 GROUP_ID = -1002485954656
-#CHANNEL_ID = -1002377166835
-CHANNEL_ID = -1002385851046
+CHANNEL_ID = -1002377166835
 my_id = bot.get_me().id
 
 @bot.message_handler(commands=['start'])
