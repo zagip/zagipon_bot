@@ -41,17 +41,25 @@ def handle_query(call):
             else:
                 bot.copy_message(CHANNEL_ID, d["c"], d["m"])
             bot.delete_message(GROUP_ID, call.message.id)
+            bot.send_message(GROUP_ID, f"Сообщение отправлено (by {call.from_user.first_name} @{call.from_user.username})", reply_to_message_id=d["i"])
             bot.send_message(d["c"], "Сообщение отправлено", reply_to_message_id=d["m"])
         else:
             bot.delete_message(GROUP_ID, call.message.id)
+            bot.send_message(GROUP_ID, f"Сообщение отклонено (by {call.from_user.first_name} @{call.from_user.username})", reply_to_message_id=d["i"])
             bot.send_message(d["c"], "Сообщение отклонено", reply_to_message_id=d["m"])
     else:
         bot.send_message(d["c"], "Спасибо за контент! Отправил загипычам на модерацию =)")
         markup = types.InlineKeyboardMarkup()
-        btn_send = types.InlineKeyboardButton("Отправить", callback_data=json.dumps({"send": 1, "c":d["c"], "m":d["m"], "a":d["a"]}))
-        btn_cancel = types.InlineKeyboardButton("Не отправлять", callback_data=json.dumps({"send": 0, "c":d["c"], "m":d["m"], "a":d["a"]}))
+        btn_send = types.InlineKeyboardButton("Отправить", callback_data=json.dumps({"send": 1, "a":d["a"], "c":d["c"], "m":d["m"], "i":d["i"]}))
+        btn_cancel = types.InlineKeyboardButton("Не отправлять", callback_data=json.dumps({"send": 0, "a":d["a"], "c":d["c"], "m":d["m"], "i":d["i"]}))
         markup.add(btn_send, btn_cancel)
         
-        bot.send_message(GROUP_ID, f"Отправить в канал? (anon={d['a']})", reply_markup=markup)
+        bot.send_message(GROUP_ID, f"Отправить в канал? (anon={d['a']})", reply_markup=markup, reply_to_message_id=d["i"])
+
+@bot.message_handler(commands=['stop_bot'])
+def stop_bot(message):
+    if message.chat.id == GROUP_ID:
+        bot.stop_polling()
+        bot.send_message(message.chat.id, "Бот остановлен")
 
 bot.polling(non_stop=True)
