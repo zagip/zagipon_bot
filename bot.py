@@ -1,6 +1,7 @@
 import telebot
 from telebot import types
 import json
+from datetime import datetime
 
 API_TOKEN = '7983118789:AAE_oZyr-JhlK6DyaotZ4LS-P1jtFv5j980'
 bot = telebot.TeleBot(API_TOKEN)
@@ -21,7 +22,7 @@ def uzhimatel(message):
         return
 
     user_info = f"Отправитель: {message.from_user.first_name} (@{message.from_user.username})"
-    print('[#] '+user_info)
+    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] "+user_info)
     mid = bot.forward_message(GROUP_ID, message.chat.id, message.id).id
 
     markup = types.InlineKeyboardMarkup()
