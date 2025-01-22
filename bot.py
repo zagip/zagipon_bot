@@ -2,12 +2,16 @@ import telebot
 from telebot import types
 import json
 from datetime import datetime
+import os
+from dotenv import load_dotenv
 
-API_TOKEN = '7983118789:AAE_oZyr-JhlK6DyaotZ4LS-P1jtFv5j980'
+load_dotenv()
+
+API_TOKEN = os.getenv('API_TOKEN')
+GROUP_ID = int(os.getenv('GROUP_ID'))
+CHANNEL_ID = int(os.getenv('CHANNEL_ID'))
 bot = telebot.TeleBot(API_TOKEN)
 
-GROUP_ID = -1002485954656
-CHANNEL_ID = -1002377166835
 my_id = bot.get_me().id
 
 @bot.message_handler(commands=['start'])
