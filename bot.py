@@ -16,7 +16,7 @@ my_id = bot.get_me().id
 
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
-    bot.send_message(message.chat.id, "Привет! Вы можете отправлять мне сообщения с текстом или любым медиа.")
+    bot.send_message(message.chat.id, "Привет! \nЭто - бот предложки https://t.me/+OtxxYjLgRP00NzVi. \n\nВы можете отправлять мне сообщения с текстом или любым медиа.")
 
 @bot.message_handler(func=lambda message: True, content_types=['audio', 'photo', 'voice', 'video', 'document',
     'text', 'location', 'contact', 'sticker', 'animation', 'poll'])
@@ -59,7 +59,7 @@ def handle_query(call):
         btn_cancel = types.InlineKeyboardButton("Не отправлять", callback_data=json.dumps({"send": 0, "a":d["a"], "c":d["c"], "m":d["m"], "i":d["i"]}))
         markup.add(btn_send, btn_cancel)
         
-        bot.send_message(GROUP_ID, f"Отправить в канал? (anon={d['a']})", reply_markup=markup, reply_to_message_id=d["i"])
+        bot.send_message(GROUP_ID, f"Отправить в канал? (anon={d['a']}, nick={call.from_user.username}, username={call.from_user.first_name} {call.from_user.last_name})", reply_markup=markup, reply_to_message_id=d["i"])
 
 @bot.message_handler(commands=['stop_bot'])
 def stop_bot(message):
