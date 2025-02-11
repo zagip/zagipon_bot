@@ -1,0 +1,4 @@
+pyTelegramBotAPI
+flask
+flask_sqlalchemy
+python-dotenv 
