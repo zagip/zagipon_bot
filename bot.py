@@ -105,8 +105,9 @@ def handle_query(call):
             bot.send_message(d["c"], "Спасибо за контент! Отправил загипычам на модерацию =)")
             markup = types.InlineKeyboardMarkup()
             btn_send = types.InlineKeyboardButton("Отправить", callback_data=json.dumps({"send": 1, "a":d["a"], "c":d["c"], "m":d["m"], "i":d["i"]}))
+            btn_nonanon = types.InlineKeyboardButton("Отправить (non-anon)", callback_data=json.dumps({"send": 1, "a":0, "c":d["c"], "m":d["m"], "i":d["i"]}))
             btn_cancel = types.InlineKeyboardButton("Не отправлять", callback_data=json.dumps({"send": 0, "a":d["a"], "c":d["c"], "m":d["m"], "i":d["i"]}))
-            markup.add(btn_send, btn_cancel)
+            markup.add(btn_send, btn_nonanon, btn_cancel)
             
             bot.send_message(GROUP_ID, f"Отправить в канал? (anon={d['a']}, nick={call.from_user.username}, username={call.from_user.first_name} {call.from_user.last_name})", reply_markup=markup, reply_to_message_id=d["i"])
 
