@@ -102,6 +102,7 @@ def handle_query(call):
                 bot.send_message(GROUP_ID, f"Сообщение отклонено (by {call.from_user.first_name} @{call.from_user.username})", reply_to_message_id=d["i"])
                 bot.send_message(d["c"], "Сообщение отклонено", reply_to_message_id=d["m"])
         else:
+            bot.delete_message(call.message.chat.id, call.message.message_id)
             bot.send_message(d["c"], "Спасибо за контент! Отправил загипычам на модерацию =)")
             markup = types.InlineKeyboardMarkup()
             btn_send = types.InlineKeyboardButton("Отправить", callback_data=json.dumps({"send": 1, "a":d["a"], "c":d["c"], "m":d["m"], "i":d["i"]}))
