@@ -8,6 +8,8 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 import random
 import string
+import time
+import threading
 
 load_dotenv()
 
@@ -37,6 +39,22 @@ class Post(db.Model):
 def generate_random_filename(extension):
     return ''.join(random.choices(string.ascii_letters + string.digits, k=10)) + extension
 
+ANTISPAM_MAX_MESSAGES = 6
+ANTISPAM_PERIOD = 180  # 3 minutes in seconds
+user_message_timestamps = {}
+_antispam_lock = threading.Lock()
+
+def is_rate_limited(user_id):
+    now = time.time()
+    with _antispam_lock:
+        timestamps = user_message_timestamps.get(user_id, [])
+        timestamps = [t for t in timestamps if now - t < ANTISPAM_PERIOD]
+        user_message_timestamps[user_id] = timestamps
+        if len(timestamps) >= ANTISPAM_MAX_MESSAGES:
+            return True
+        timestamps.append(now)
+        return False
+
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
     bot.send_message(message.chat.id, "Привет! \nЭто - бот предложки https://t.me/+OtxxYjLgRP00NzVi. \n\nВы можете отправлять мне сообщения с текстом или любым медиа.")
@@ -46,6 +64,10 @@ def send_welcome(message):
 def uzhimatel(message):
     if message.chat.id == GROUP_ID and message.from_user.id != my_id:
         bot.delete_message(GROUP_ID, message.id)
+        return
+
+    if is_rate_limited(message.from_user.id):
+        bot.send_message(message.chat.id, "Слишком много сообщений! Подождите немного перед отправкой нового.")
         return
 
     user_info = f"Отправитель: {message.from_user.first_name} (@{message.from_user.username})"
