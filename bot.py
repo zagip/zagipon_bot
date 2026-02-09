@@ -69,7 +69,7 @@ def uzhimatel(message):
             reply_text = message.text
             if not reply_text:
                 return
-            bot.send_message(user_info["chat_id"], f"Ответ от модератора:\n{reply_text}", reply_to_message_id=user_info["message_id"])
+            bot.send_message(user_info["chat_id"], f"Ответ загипычей:\n{reply_text}", reply_to_message_id=user_info["message_id"])
             return
         bot.delete_message(GROUP_ID, message.id)
         return
