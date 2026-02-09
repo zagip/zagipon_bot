@@ -1,20 +1,28 @@
-version: '3.8'
+version: "3.8"
 
 services:
   bot:
     build: .
+    environment:
+      API_TOKEN: ${API_TOKEN}
+      GROUP_ID: ${GROUP_ID}
+      CHANNEL_ID: ${CHANNEL_ID}
     volumes:
       - ./static:/app/static
       - ./instance:/app/instance
-    command: ./start-bot.sh
+    command: ["./start-bot.sh"]
     restart: unless-stopped
 
   web:
     build: .
+    environment:
+      API_TOKEN: ${API_TOKEN}
+      GROUP_ID: ${GROUP_ID}
+      CHANNEL_ID: ${CHANNEL_ID}
     ports:
       - "15000:15000"
     volumes:
       - ./static:/app/static
       - ./instance:/app/instance
-    command: python3 app.py
+    command: ["python3", "app.py"]
     restart: unless-stopped
