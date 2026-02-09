@@ -42,6 +42,7 @@ def generate_random_filename(extension):
 ANTISPAM_MAX_MESSAGES = 6
 ANTISPAM_PERIOD = 180  # 3 minutes in seconds
 user_message_timestamps = {}
+forwarded_to_user = {}
 _antispam_lock = threading.Lock()
 
 def is_rate_limited(user_id):
@@ -63,6 +64,13 @@ def send_welcome(message):
     'text', 'location', 'contact', 'sticker', 'animation', 'poll'])
 def uzhimatel(message):
     if message.chat.id == GROUP_ID and message.from_user.id != my_id:
+        if message.reply_to_message and message.reply_to_message.message_id in forwarded_to_user:
+            user_info = forwarded_to_user[message.reply_to_message.message_id]
+            reply_text = message.text
+            if not reply_text:
+                return
+            bot.send_message(user_info["chat_id"], f"Ответ от модератора:\n{reply_text}", reply_to_message_id=user_info["message_id"])
+            return
         bot.delete_message(GROUP_ID, message.id)
         return
 
@@ -73,6 +81,7 @@ def uzhimatel(message):
     user_info = f"Отправитель: {message.from_user.first_name} (@{message.from_user.username})"
     print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] "+user_info)
     mid = bot.forward_message(GROUP_ID, message.chat.id, message.id).id
+    forwarded_to_user[mid] = {"chat_id": message.chat.id, "message_id": message.id}
 
     markup = types.InlineKeyboardMarkup()
     btn_send = types.InlineKeyboardButton("Указать имя", callback_data=json.dumps({"a": 0, "c":message.chat.id, "m":message.id, "i": mid}))
