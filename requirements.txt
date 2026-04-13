@@ -1,4 +1,5 @@
 pyTelegramBotAPI
 flask
 flask_sqlalchemy
-python-dotenv 
+python-dotenv
+requests[socks] 

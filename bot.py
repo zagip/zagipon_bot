@@ -1,5 +1,5 @@
 import telebot
-from telebot import types
+from telebot import types, apihelper
 import json
 from datetime import datetime
 import os
@@ -16,6 +16,11 @@ load_dotenv()
 API_TOKEN = os.getenv('API_TOKEN')
 GROUP_ID = int(os.getenv('GROUP_ID'))
 CHANNEL_ID = int(os.getenv('CHANNEL_ID'))
+
+socks5_proxy_url = os.getenv('SOCKS5_PROXY_URL')
+if socks5_proxy_url:
+    apihelper.proxy = {'https': socks5_proxy_url}
+
 bot = telebot.TeleBot(API_TOKEN)
 
 my_id = bot.get_me().id
