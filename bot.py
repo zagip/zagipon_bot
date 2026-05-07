@@ -3,6 +3,8 @@ from telebot import types, apihelper
 import json
 from datetime import datetime
 import os
+from urllib.parse import urlparse, parse_qs
+from typing import Optional
 from dotenv import load_dotenv
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
@@ -18,8 +20,37 @@ GROUP_ID = int(os.getenv('GROUP_ID'))
 CHANNEL_ID = int(os.getenv('CHANNEL_ID'))
 
 socks5_proxy_url = os.getenv('SOCKS5_PROXY_URL')
-if socks5_proxy_url:
-    apihelper.proxy = {'https': socks5_proxy_url}
+mtproxy_url = os.getenv('MTPROXY_URL')
+
+
+def _extract_proxy_url() -> Optional[str]:
+    if socks5_proxy_url:
+        return socks5_proxy_url
+
+    if not mtproxy_url:
+        return None
+
+    parsed = urlparse(mtproxy_url)
+
+    # Поддержка ссылок формата tg://proxy?server=...&port=...&secret=...
+    # Для Bot API реальным транспортом остается SOCKS5/HTTP-прокси.
+    if parsed.scheme == 'tg' and parsed.netloc == 'proxy':
+        qs = parse_qs(parsed.query)
+        server = qs.get('server', [None])[0]
+        port = qs.get('port', [None])[0]
+        if server and port:
+            return f"socks5://{server}:{port}"
+
+    # Поддержка короткого формата mtproxy://host:port
+    if parsed.scheme == 'mtproxy' and parsed.hostname and parsed.port:
+        return f"socks5://{parsed.hostname}:{parsed.port}"
+
+    return mtproxy_url
+
+
+proxy_url = _extract_proxy_url()
+if proxy_url:
+    apihelper.proxy = {'https': proxy_url}
 
 bot = telebot.TeleBot(API_TOKEN)
 
