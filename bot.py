@@ -10,20 +10,36 @@ import random
 import string
 import time
 import threading
+from proxy_config import ConfigError, configure_telegram_proxy, load_settings
 
 load_dotenv()
 
-API_TOKEN = os.getenv('API_TOKEN')
-GROUP_ID = int(os.getenv('GROUP_ID'))
-CHANNEL_ID = int(os.getenv('CHANNEL_ID'))
+try:
+    settings = load_settings()
+    configure_telegram_proxy(apihelper, settings.proxy)
+except ConfigError as exc:
+    raise SystemExit(f"Configuration error: {exc}") from exc
 
-socks5_proxy_url = os.getenv('SOCKS5_PROXY_URL')
-if socks5_proxy_url:
-    apihelper.proxy = {'https': socks5_proxy_url}
+API_TOKEN = settings.api_token
+GROUP_ID = settings.group_id
+CHANNEL_ID = settings.channel_id
 
 bot = telebot.TeleBot(API_TOKEN)
 
-my_id = bot.get_me().id
+my_id = None
+
+
+def get_bot_id():
+    global my_id
+    if my_id is None:
+        try:
+            my_id = bot.get_me().id
+        except Exception as exc:
+            raise SystemExit(
+                f"Telegram startup check failed ({exc.__class__.__name__}). "
+                "Check API_TOKEN, proxy URL and network access."
+            ) from None
+    return my_id
 
 def create_app():
     app = Flask(__name__)
@@ -68,7 +84,7 @@ def send_welcome(message):
 @bot.message_handler(func=lambda message: True, content_types=['audio', 'photo', 'voice', 'video', 'document',
     'text', 'location', 'contact', 'sticker', 'animation', 'poll'])
 def uzhimatel(message):
-    if message.chat.id == GROUP_ID and message.from_user.id != my_id:
+    if message.chat.id == GROUP_ID and message.from_user.id != get_bot_id():
         if message.reply_to_message and message.reply_to_message.message_id in forwarded_to_user:
             user_info = forwarded_to_user[message.reply_to_message.message_id]
             reply_text = message.text
@@ -157,4 +173,5 @@ def stop_bot(message):
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
+        get_bot_id()
         bot.polling(non_stop=True)

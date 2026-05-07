@@ -1,13 +1,37 @@
-version: "3.8"
+x-proxy-build-args: &proxy-build-args
+  HTTP_PROXY: ${HTTP_PROXY:-}
+  HTTPS_PROXY: ${HTTPS_PROXY:-}
+  ALL_PROXY: ${ALL_PROXY:-}
+  NO_PROXY: ${NO_PROXY:-}
+  http_proxy: ${http_proxy:-}
+  https_proxy: ${https_proxy:-}
+  all_proxy: ${all_proxy:-}
+  no_proxy: ${no_proxy:-}
+
+x-common-environment: &common-environment
+  API_TOKEN: ${API_TOKEN}
+  GROUP_ID: ${GROUP_ID}
+  CHANNEL_ID: ${CHANNEL_ID}
+  TELEGRAM_PROXY_URL: ${TELEGRAM_PROXY_URL:-}
+  SOCKS5_PROXY_URL: ${SOCKS5_PROXY_URL:-}
+  PROXY_URL: ${PROXY_URL:-}
+  TELEGRAM_REQUIRE_PROXY: ${TELEGRAM_REQUIRE_PROXY:-0}
+  HTTP_PROXY: ${HTTP_PROXY:-}
+  HTTPS_PROXY: ${HTTPS_PROXY:-}
+  ALL_PROXY: ${ALL_PROXY:-}
+  NO_PROXY: ${NO_PROXY:-}
+  http_proxy: ${http_proxy:-}
+  https_proxy: ${https_proxy:-}
+  all_proxy: ${all_proxy:-}
+  no_proxy: ${no_proxy:-}
 
 services:
   bot:
-    build: .
+    build:
+      context: .
+      args: *proxy-build-args
     environment:
-      API_TOKEN: ${API_TOKEN}
-      GROUP_ID: ${GROUP_ID}
-      CHANNEL_ID: ${CHANNEL_ID}
-      SOCKS5_PROXY_URL: ${SOCKS5_PROXY_URL}
+      <<: *common-environment
     volumes:
       - ./static:/app/static
       - ./instance:/app/instance
@@ -15,11 +39,11 @@ services:
     restart: unless-stopped
 
   web:
-    build: .
+    build:
+      context: .
+      args: *proxy-build-args
     environment:
-      API_TOKEN: ${API_TOKEN}
-      GROUP_ID: ${GROUP_ID}
-      CHANNEL_ID: ${CHANNEL_ID}
+      <<: *common-environment
     ports:
       - "15000:15000"
     volumes:
