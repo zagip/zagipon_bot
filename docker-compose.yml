@@ -8,6 +8,7 @@ services:
       GROUP_ID: ${GROUP_ID}
       CHANNEL_ID: ${CHANNEL_ID}
       SOCKS5_PROXY_URL: ${SOCKS5_PROXY_URL}
+      MTPROXY_URL: ${MTPROXY_URL}
     volumes:
       - ./static:/app/static
       - ./instance:/app/instance
@@ -20,6 +21,9 @@ services:
       API_TOKEN: ${API_TOKEN}
       GROUP_ID: ${GROUP_ID}
       CHANNEL_ID: ${CHANNEL_ID}
+      SOCKS5_PROXY_URL: ${SOCKS5_PROXY_URL}
+      MTPROXY_URL: ${MTPROXY_URL}
+      PROXY_URL: ${PROXY_URL}
     ports:
       - "15000:15000"
     volumes:

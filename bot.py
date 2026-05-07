@@ -3,6 +3,8 @@ from telebot import types, apihelper
 import json
 from datetime import datetime
 import os
+from urllib.parse import urlparse
+from typing import Optional
 from dotenv import load_dotenv
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
@@ -18,12 +20,49 @@ GROUP_ID = int(os.getenv('GROUP_ID'))
 CHANNEL_ID = int(os.getenv('CHANNEL_ID'))
 
 socks5_proxy_url = os.getenv('SOCKS5_PROXY_URL')
-if socks5_proxy_url:
-    apihelper.proxy = {'https': socks5_proxy_url}
+mtproxy_url = os.getenv('MTPROXY_URL')
+generic_proxy_url = os.getenv('PROXY_URL')
+
+
+def _extract_proxy_url() -> Optional[str]:
+    if socks5_proxy_url:
+        return socks5_proxy_url
+
+    raw_proxy_url = None
+    proxy_source = None
+    if mtproxy_url:
+        raw_proxy_url = mtproxy_url
+        proxy_source = 'MTPROXY_URL'
+    elif generic_proxy_url:
+        raw_proxy_url = generic_proxy_url
+        proxy_source = 'PROXY_URL'
+
+    if not raw_proxy_url:
+        return None
+
+    parsed = urlparse(raw_proxy_url)
+
+    # В Bot API можно использовать только HTTP/SOCKS прокси.
+    # MTProxy-ссылки (tg://proxy или mtproxy://) не являются SOCKS-прокси.
+    if parsed.scheme in ('tg', 'mtproxy') and proxy_source != 'MTPROXY_URL':
+        print('MTPROXY_URL/PROXY_URL looks like MTProxy link. '
+              'pyTelegramBotAPI requires SOCKS5/HTTP proxy URL (e.g. socks5://host:port).')
+        return None
+
+    return raw_proxy_url
+
+
+proxy_url = _extract_proxy_url()
+if proxy_url:
+    apihelper.proxy = {'https': proxy_url}
 
 bot = telebot.TeleBot(API_TOKEN)
 
-my_id = bot.get_me().id
+try:
+    my_id = bot.get_me().id
+except Exception as exc:
+    my_id = None
+    print(f"Failed to resolve bot id during startup: {exc}")
 
 def create_app():
     app = Flask(__name__)
@@ -68,7 +107,7 @@ def send_welcome(message):
 @bot.message_handler(func=lambda message: True, content_types=['audio', 'photo', 'voice', 'video', 'document',
     'text', 'location', 'contact', 'sticker', 'animation', 'poll'])
 def uzhimatel(message):
-    if message.chat.id == GROUP_ID and message.from_user.id != my_id:
+    if message.chat.id == GROUP_ID and (my_id is None or message.from_user.id != my_id):
         if message.reply_to_message and message.reply_to_message.message_id in forwarded_to_user:
             user_info = forwarded_to_user[message.reply_to_message.message_id]
             reply_text = message.text
