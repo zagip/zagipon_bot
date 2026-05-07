@@ -4,6 +4,7 @@ import json
 from datetime import datetime
 import os
 from urllib.parse import urlparse, parse_qs
+from typing import Optional
 from dotenv import load_dotenv
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
@@ -22,7 +23,7 @@ socks5_proxy_url = os.getenv('SOCKS5_PROXY_URL')
 mtproxy_url = os.getenv('MTPROXY_URL')
 
 
-def _extract_proxy_url() -> str | None:
+def _extract_proxy_url() -> Optional[str]:
     if socks5_proxy_url:
         return socks5_proxy_url
 
